@@ -71,16 +71,25 @@ class Parser < Scanner
     end
 
     def exp()
-        exp = AST.new(Token.new("expression", "expression"));
-        exp.addChild(term())
-        exp.addChild(etail())
+        #exp = AST.new(Token.new("expression", "expression"));
+        exp = term()
+        if (@lookahead.type == Token::ADDOP or @lookahead.type == Token::SUBOP)
+            ex = etail()
+            ex.addChild(exp)
+            return ex
+        end
         return exp
     end
 
     def term()
-        trm = AST.new(Token.new("term","term"))
-        trm.addChild(factor())
-        trm.addChild(ttail())
+        #trm = AST.new(Token.new("term","term"))
+        trm = factor()
+        if(@lookahead.type == Token::MULTOP or @lookahead.type == Token::DIVOP)    
+            tm = ttail()
+            tm.addChild(trm)
+            return tm
+        end 
+        return trm
     end
 
     def factor()
@@ -88,10 +97,10 @@ class Parser < Scanner
         if (@lookahead.type == Token::LPAREN)
             #lp = AST.new(@lookahead)
             match(Token::LPAREN)
-            lp = exp()
+            fct = exp()
             if (@lookahead.type == Token::RPAREN)
                 #fct = AST.new(@lookahead)
-                fct.addChild(lp)
+                #fct.addChild(lp)
                 match(Token::RPAREN)
             else
 				match(Token::RPAREN)
