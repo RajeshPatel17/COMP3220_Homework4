@@ -71,27 +71,36 @@ class Parser < Scanner
     end
 
     def exp()
-        term()
-        etail()
+        exp = AST.new(Token.new("expression", "expression"));
+        exp.addChild(term())
+        exp.addChild(etail())
+        return exp
     end
 
     def term()
-        factor()
-        ttail()
+        trm = AST.new(Token.new("term","term"))
+        trm.addChild(factor())
+        trm.addChild(ttail())
     end
 
     def factor()
+        fct = AST.new(Token.new("factor", "factor"))
         if (@lookahead.type == Token::LPAREN)
+            #lp = AST.new(@lookahead)
             match(Token::LPAREN)
-            exp()
+            lp = exp()
             if (@lookahead.type == Token::RPAREN)
+                #fct = AST.new(@lookahead)
+                fct.addChild(lp)
                 match(Token::RPAREN)
             else
 				match(Token::RPAREN)
             end
         elsif (@lookahead.type == Token::INT)
+            fct = AST.new(@lookahead)
             match(Token::INT)
         elsif (@lookahead.type == Token::ID)
+            fct = AST.new(@lookahead)
             match(Token::ID)
         else
             puts "Expected ( or INT or ID found #{@lookahead.text}"
@@ -102,31 +111,39 @@ class Parser < Scanner
     end
 
     def ttail()
+        tt = AST.new(Token.new("ttail", "ttail"))
         if (@lookahead.type == Token::MULTOP)
+            tt = AST.new(@lookahead)
             match(Token::MULTOP)
-            factor()
-            ttail()
+            tt.addChild(factor())
+            tt.addChild(ttail())
         elsif (@lookahead.type == Token::DIVOP)
+            tt = AST.new(@lookahead)
             match(Token::DIVOP)
-            factor()
-            ttail()
+            tt.addChild(factor())
+            tt.addChild(ttail())
 		else
 			return nil
         end
+        return tt
     end
 
     def etail()
+        et = AST.new(Token.new("etail", "etail"))
         if (@lookahead.type == Token::ADDOP)
+            et = AST.new(@lookahead)
             match(Token::ADDOP)
-            term()
-            etail()
+            et.addChild(term())
+            et.addChild(etail())
         elsif (@lookahead.type == Token::SUBOP)
+            etail = AST.new(@lookahead)
             match(Token::SUBOP)
-            term()
-            etail()
+            et.addChild(term())
+            et.addChild(etail())
 		else
 			return nil
         end
+        return et;
     end
 
     def assign()
